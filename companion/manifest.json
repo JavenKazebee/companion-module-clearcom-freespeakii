@@ -1,0 +1,28 @@
+{
+	"$schema": "../node_modules/@companion-module/base/assets/manifest.schema.json",
+	"type": "connection",
+	"id": "clearcom-freespeakii",
+	"name": "clearcom-freespeakii",
+	"shortname": "freespeakii",
+	"description": "Clear-Com FreeSpeak II base station: beltpack tallies, battery/status, call signals, RMK, role and port routing",
+	"version": "0.1.0",
+	"license": "MIT",
+	"repository": "git+https://github.com/bitfocus/companion-module-clearcom-freespeakii.git",
+	"bugs": "https://github.com/bitfocus/companion-module-clearcom-freespeakii/issues",
+	"maintainers": [
+		{
+			"name": "Javen Kazebee",
+			"email": "javen.kazebee@gmail.com"
+		}
+	],
+	"runtime": {
+		"type": "node22",
+		"api": "nodejs-ipc",
+		"apiVersion": "0.0.0",
+		"entrypoint": "../dist/main.js"
+	},
+	"legacyIds": [],
+	"manufacturer": "Clear-Com",
+	"products": ["FreeSpeak II", "FSII-BASE-II"],
+	"keywords": ["intercom", "wireless", "beltpack", "partyline", "tally"]
+}
