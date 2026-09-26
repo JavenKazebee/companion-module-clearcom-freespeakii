@@ -115,11 +115,39 @@ export function channelParticipants(state: FsiiState, connectionId: number): Par
 	return state.connectionLive.get(connectionId)?.participants ?? []
 }
 
-export const channelTalkers = (state: FsiiState, connectionId: number): Participant[] =>
-	channelParticipants(state, connectionId).filter((p) => p.events?.talk)
+/**
+ * Whether a pack is talking on a channel. FSII leaves `events.talk` false, so use the pack's own key state
+ * (pushed instantly via EndpointUpdated) mapped through its role's keysets. The reply key has no fixed
+ * channel, and roles may lack keysets, so fall back to the participant `joinState` (refetched, can lag ~1 s).
+ */
+function packTalksOn(state: FsiiState, e: Endpoint, p: Participant, connectionId: number): boolean {
+	if (!isTalking(e)) return false
+	const roleId = packRoleId(e)
+	const keysets = roleId === undefined ? undefined : state.roles.get(roleId)?.settings?.keysets
+	const res = `/api/1/connections/${connectionId}`
+	for (const k of e.liveStatus?.keyState ?? []) {
+		if (!k.currentState?.includes('talk')) continue
+		const ks = keysets?.find((s) => s.keysetIndex === k.keysetIndex)
+		if (ks?.connections?.length && !ks.isReplyKey) {
+			if (ks.connections.some((c) => c.res === res)) return true
+		} else if (p.joinState?.startsWith('Talk')) return true
+	}
+	return false
+}
 
-export const channelCallers = (state: FsiiState, connectionId: number): Participant[] =>
-	channelParticipants(state, connectionId).filter((p) => p.events?.call)
+export const channelTalkers = (state: FsiiState, connectionId: number): Participant[] =>
+	channelParticipants(state, connectionId).filter((p) => {
+		const e = state.endpoints.get(p.id)
+		return e && isPack(e) ? packTalksOn(state, e, p, connectionId) : !!p.events?.talk
+	})
+
+/** Members with a call signal: the connection's own call flag, or a member pack whose callState is active. */
+export function channelCallers(state: FsiiState, connectionId: number): Participant[] {
+	return channelParticipants(state, connectionId).filter((p) => {
+		const e = state.endpoints.get(p.id)
+		return p.events?.call || (e !== undefined && isCalling(e))
+	})
+}
 
 export function portInChannel(state: FsiiState, portId: number, connectionId: number): boolean {
 	return String(connectionId) in (state.ports.get(portId)?.port_connections ?? {})

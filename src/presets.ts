@@ -108,7 +108,7 @@ export function UpdatePresets(self: ModuleInstance): void {
 	}
 	presets.alert_caller = {
 		type: 'simple',
-		name: 'Last incoming call',
+		name: 'Last call signal',
 		keywords: ['call', 'caller'],
 		style: {
 			text: `CALL\n${v('last_caller')}\n${v('last_call_channel')}`,

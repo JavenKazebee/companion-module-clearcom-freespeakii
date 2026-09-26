@@ -35,11 +35,18 @@ export interface Endpoint {
 	[key: string]: unknown
 }
 
+export interface RoleKeyset {
+	keysetIndex: number
+	connections?: { res: string }[] // e.g. '/api/1/connections/3'
+	isReplyKey?: boolean
+}
+
 export interface Role {
 	id: number
 	type: string
 	label: string
 	isDefault?: boolean
+	settings?: { keysets?: RoleKeyset[]; [key: string]: unknown }
 	[key: string]: unknown
 }
 
@@ -54,10 +61,10 @@ export interface Participant {
 	device_id: number
 	label: string
 	type: string // 'FSII-BP' | 'SA' | 'PGM' | '2W' | '4W'
-	joinState?: string
+	joinState?: string // live for packs ('Talk' | 'Talk-Listen' while keyed); fixed config for ports
 	state?: string
 	res?: string
-	events?: { call?: boolean; talk?: boolean; control?: boolean }
+	events?: { call?: boolean; talk?: boolean; control?: boolean } // FSII never sets talk
 }
 
 export interface ConnectionLiveStatus {

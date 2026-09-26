@@ -157,6 +157,7 @@ export function UpdateFeedbacks(self: ModuleInstance): void {
 		channel_calling: {
 			type: 'boolean',
 			name: 'Channel: someone is calling',
+			description: 'A member pack or port has a call signal active',
 			defaultStyle: { bgcolor: COLORS.amber, color: COLORS.black },
 			options: [connectionOption],
 			callback: ({ options }) => state.ready && channelCallers(state, options.connection).length > 0,

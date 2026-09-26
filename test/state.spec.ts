@@ -3,10 +3,12 @@ import { readFileSync } from 'node:fs'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { FsiiState, setByPath } from '../src/state.js'
 import {
+	channelCallers,
 	channelTalkers,
 	isCalling,
 	isTalking,
 	missingRoles,
+	packRoleId,
 	packsForRole,
 	portInChannel,
 	resolveTargets,
@@ -48,6 +50,14 @@ describe('FsiiState', () => {
 			structure: false,
 		})
 		expect(s.applyEndpointUpdate({ endpointId: 63184, path: 'liveStatus.status', value: 'offline' })).toEqual({
+			live: true,
+			structure: false,
+		})
+		expect(s.applyEndpointUpdate({ endpointId: 63184, path: 'liveStatus.role', value: 11 })).toEqual({
+			live: true,
+			structure: false,
+		})
+		expect(s.applyEndpointUpdate({ endpointId: 63184, path: 'label', value: 'Renamed' })).toEqual({
 			live: true,
 			structure: true,
 		})
@@ -96,6 +106,29 @@ describe('FsiiState', () => {
 		expect(s.lastCall).toBe(first)
 	})
 
+	it('records a pack call signal as the last call, with the channel Companion called', () => {
+		const [on, off] = fixture<{ data: EndpointUpdatedEvent }[]>('call_events')
+		s.noteCallChannel([63184], 'Channel 2')
+		s.applyEndpointUpdate(on.data)
+		const first = s.lastCall
+		expect(first?.label).toBe('Companion')
+		expect(first?.channel).toBe('Channel 2')
+		expect(channelCallers(s, 2).map((p) => p.id)).toContain(63184)
+		// repeated snapshots while calling are not a new call
+		s.setEndpoints(structuredClone([...s.endpoints.values()]))
+		expect(s.lastCall).toBe(first)
+		s.applyEndpointUpdate(off.data)
+		expect(channelCallers(s, 2)).toEqual([])
+		expect(computeVariableValues(s, true, 20).last_caller).toBe('Companion')
+	})
+
+	it('leaves the channel blank for calls Companion did not send on a channel', () => {
+		const [on] = fixture<{ data: EndpointUpdatedEvent }[]>('call_events')
+		s.applyEndpointUpdate(on.data)
+		expect(s.lastCall?.label).toBe('Role 35')
+		expect(s.lastCall?.channel).toBe('')
+	})
+
 	it('setByPath creates intermediate objects', () => {
 		const o: Record<string, unknown> = {}
 		setByPath(o, 'a.b.c', 1)
@@ -139,6 +172,28 @@ describe('resolve', () => {
 		expect(portInChannel(s, 65536, 12)).toBe(true)
 		expect(portInChannel(s, 65536, 1)).toBe(false)
 		expect(channelTalkers(s, 1)).toEqual([])
+	})
+
+	it('finds channel talkers from pack key state, not events.talk', () => {
+		// 63185 and 63206 hold key 2 on channel 4; the base reports events.talk=false for both
+		const talkers = () =>
+			channelTalkers(s, 4)
+				.map((p) => p.id)
+				.sort()
+		expect(talkers()).toEqual([63185, 63206])
+
+		// with role keysets, the key mapping wins over a stale joinState
+		const role = s.roles.get(packRoleId(s.endpoints.get(63185)!)!)!
+		role.settings = { keysets: [{ keysetIndex: 1, connections: [{ res: '/api/1/connections/2' }] }] }
+		expect(talkers()).toEqual([63206])
+
+		// releasing the key clears the tally immediately
+		s.applyEndpointUpdate({
+			endpointId: 63206,
+			path: 'liveStatus.keyState',
+			value: [{ keysetIndex: 1, currentState: 'listen', volume: 80 }],
+		})
+		expect(talkers()).toEqual([])
 	})
 
 	it('lists expected roles with no pack online', () => {

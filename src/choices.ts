@@ -3,7 +3,7 @@ import type {
 	CompanionInputFieldTextInput,
 	DropdownChoice,
 } from '@companion-module/base'
-import { isOnline, packRoles, packs, packsForRole } from './resolve.js'
+import { packRoles, packs } from './resolve.js'
 import type { FsiiState } from './state.js'
 import { decodePortId } from './types.js'
 
@@ -16,17 +16,15 @@ export const KEY_CHOICES: DropdownChoice[] = [
 	{ id: 4, label: 'Reply key' },
 ]
 
+// Choice labels only use ids and configured labels, never live status, so packs going in and out of range do not
+// force a rebuild of every definition. Live status is shown through variables and feedbacks instead.
+
 /** Roles first (target whoever holds the role), then physical packs as a fallback. */
 export function targetChoices(state: FsiiState): DropdownChoice<string>[] {
-	const roles = packRoles(state).map((r) => {
-		const holders = packsForRole(state, r.id)
-		const online = holders.filter(isOnline)
-		const where = online.length ? online.map((e) => e.label).join(', ') : holders.length ? 'offline' : 'unassigned'
-		return { id: `r:${r.id}`, label: `${r.label} — ${where}` }
-	})
+	const roles = packRoles(state).map((r) => ({ id: `r:${r.id}`, label: r.label }))
 	const packList = packs(state)
 		.sort((a, b) => a.label.localeCompare(b.label))
-		.map((e) => ({ id: `p:${e.id}`, label: `Pack ${e.label} (${isOnline(e) ? 'online' : 'offline'})` }))
+		.map((e) => ({ id: `p:${e.id}`, label: `Pack ${e.label}` }))
 	return [...roles, ...packList]
 }
 
@@ -37,19 +35,13 @@ export function roleChoices(state: FsiiState): DropdownChoice<number>[] {
 export function packChoices(state: FsiiState): DropdownChoice<number>[] {
 	return packs(state)
 		.sort((a, b) => a.label.localeCompare(b.label))
-		.map((e) => {
-			const role = e.role?.label ? ` · ${e.role.label}` : ''
-			return { id: e.id, label: `${e.label}${role} (${isOnline(e) ? 'online' : 'offline'})` }
-		})
+		.map((e) => ({ id: e.id, label: e.label }))
 }
 
 export function connectionChoices(state: FsiiState): DropdownChoice<number>[] {
 	return [...state.connections.values()]
 		.sort((a, b) => a.id - b.id)
-		.map((c) => {
-			const n = state.connectionLive.get(c.id)?.participants?.filter((p) => p.type === 'FSII-BP').length ?? 0
-			return { id: c.id, label: `${c.label} (${c.type}${n ? `, ${n} packs` : ''})` }
-		})
+		.map((c) => ({ id: c.id, label: `${c.label} (${c.type})` }))
 }
 
 export function portChoices(state: FsiiState): DropdownChoice<number>[] {

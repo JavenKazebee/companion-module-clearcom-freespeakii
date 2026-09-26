@@ -182,11 +182,14 @@ export function UpdateActions(self: ModuleInstance): void {
 			],
 			callback: async ({ options }) => {
 				const members = channelParticipants(state, options.connection)
-				const packTargets = members.filter((p) => state.endpoints.has(p.id)).map((p) => `p:${p.id}`)
+				const packIds = members.filter((p) => state.endpoints.has(p.id)).map((p) => p.id)
+				const packTargets = packIds.map((id) => `p:${id}`)
 				const portIds = members
 					.map((p) => Number(/\/ports\/(\d+)$/.exec(p.res ?? '')?.[1]))
 					.filter((id) => state.ports.has(id))
+				const channel = state.connections.get(options.connection)?.label ?? ''
 				const send = async (active: boolean) => {
+					if (active) state.noteCallChannel(packIds, channel)
 					await forPacks({ targets: packTargets, names: '' }, 'Channel call', true, async (id) =>
 						self.api!.callEndpoint(id, active, active ? options.text : ''),
 					)

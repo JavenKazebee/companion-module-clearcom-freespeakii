@@ -8,6 +8,7 @@ import type {
 	Port,
 	Role,
 } from './types.js'
+import { isCalling, packName } from './resolve.js'
 
 /** What changed in a state update, so the module only redraws what it must. */
 export interface StateChange {
@@ -24,6 +25,8 @@ export interface IncomingCall {
 }
 
 const NONE: StateChange = { live: false, structure: false }
+/** How long a channel call sent from Companion labels the packs it rings (the base does not report the channel). */
+const CALL_CHANNEL_MS = 10_000
 
 /** Set `obj.a.b.c = value` for a dotted path, creating intermediate objects. */
 export function setByPath(obj: Record<string, unknown>, path: string, value: unknown): void {
@@ -36,9 +39,9 @@ export function setByPath(obj: Record<string, unknown>, path: string, value: unk
 	cur[parts[parts.length - 1]] = value
 }
 
-/** Identity of an endpoint for dropdown purposes: changes when a pack appears, is renamed or changes role. */
+/** Identity of an endpoint for dropdown purposes: changes when a pack appears or is renamed, not on live status. */
 function endpointStructureKey(e: Endpoint): string {
-	return `${e.id}|${e.label}|${e.type}|${e.role?.id ?? ''}|${e.liveStatus?.role ?? ''}|${e.liveStatus?.status ?? ''}`
+	return `${e.id}|${e.label}|${e.type}`
 }
 
 export class FsiiState {
@@ -55,6 +58,29 @@ export class FsiiState {
 	ready = false
 
 	#endpointJson = new Map<number, string>()
+	#callChannels = new Map<number, { label: string; until: number }>()
+
+	/** Remember which channel a Companion channel call was sent on, so the packs it rings report that channel. */
+	noteCallChannel(endpointIds: number[], label: string): void {
+		const until = Date.now() + CALL_CHANNEL_MS
+		for (const id of endpointIds) this.#callChannels.set(id, { label, until })
+	}
+
+	/**
+	 * A pack's call signal (liveStatus.callState) went active: record it as the last call. This is the only call
+	 * signal the base reports for calls sent from Companion or the web UI; connection events.call stays false.
+	 * The pack here is the one being rung, so a call Companion sent is credited to Companion, not to that pack.
+	 */
+	#trackCall(e: Endpoint, wasCalling: boolean): void {
+		if (wasCalling || !isCalling(e)) return
+		const origin = this.#callChannels.get(e.id)
+		const fromCompanion = !!origin && origin.until > Date.now()
+		this.lastCall = {
+			label: fromCompanion ? 'Companion' : packName(this, e),
+			channel: fromCompanion ? origin.label : '',
+			time: new Date(),
+		}
+	}
 
 	/** Full endpoint snapshot (EndpointInit or REST). Redundant broadcasts from other clients are no-ops. */
 	setEndpoints(list: Endpoint[]): StateChange {
@@ -69,6 +95,8 @@ export class FsiiState {
 			if (!prev || endpointStructureKey(prev) !== endpointStructureKey(e)) structure = true
 			this.endpoints.set(e.id, e)
 			this.#endpointJson.set(e.id, json)
+			// packs already calling in the first snapshot are not a new call
+			this.#trackCall(e, !prev || isCalling(prev))
 			live = true
 		}
 		for (const id of [...this.endpoints.keys()]) {
@@ -85,8 +113,10 @@ export class FsiiState {
 		const e = this.endpoints.get(evt?.endpointId)
 		if (!e || typeof evt.path !== 'string' || !evt.path) return NONE
 		const before = endpointStructureKey(e)
+		const wasCalling = isCalling(e)
 		setByPath(e, evt.path, evt.value)
 		this.#endpointJson.set(e.id, JSON.stringify(e))
+		this.#trackCall(e, wasCalling)
 		return { live: true, structure: endpointStructureKey(e) !== before }
 	}
 

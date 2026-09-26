@@ -50,9 +50,9 @@ export function UpdateVariableDefinitions(self: ModuleInstance): void {
 		packs_total: { name: 'Beltpacks registered' },
 		low_battery_list: { name: 'Online packs below the low battery threshold' },
 		offline_list: { name: 'Offline packs holding a non-default role' },
-		last_caller: { name: 'Last incoming call: who' },
-		last_call_channel: { name: 'Last incoming call: channel' },
-		last_call_time: { name: 'Last incoming call: time (HH:MM:SS)' },
+		last_caller: { name: 'Last call signal: calling pack (role), or Companion' },
+		last_call_channel: { name: 'Last call signal: channel (when known)' },
+		last_call_time: { name: 'Last call signal: time (HH:MM:SS)' },
 	}
 	for (const role of packRoles(state)) {
 		for (const [field, desc] of Object.entries(ROLE_FIELDS)) {
