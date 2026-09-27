@@ -14,29 +14,57 @@ export function UpdatePresets(self: ModuleInstance): void {
 
 	for (const role of packRoles(state)) {
 		const id = `role_${role.id}`
+		const target = { targets: [`r:${role.id}`], names: '' }
 		rolePresets.push(id)
 		presets[id] = {
 			type: 'simple',
 			name: `${role.label}: call + status`,
 			keywords: ['role', 'call', 'status', role.label],
-			style: { text: role.label, size: 'auto', color: COLORS.white, bgcolor: COLORS.black },
+			style: {
+				text: `${role.label}\n${v(`r${role.id}_battery`)}`,
+				size: '14',
+				color: COLORS.white,
+				bgcolor: COLORS.black,
+			},
 			steps: [
 				{
 					down: [
 						{
 							actionId: 'call_role',
-							options: { targets: [`r:${role.id}`], names: '', mode: 'on', pulseMs: 2000, text: '' },
+							options: { ...target, mode: 'on', pulseMs: 2000, text: '' },
 						},
 					],
 					up: [
 						{
 							actionId: 'call_role',
-							options: { targets: [`r:${role.id}`], names: '', mode: 'off', pulseMs: 2000, text: '' },
+							options: { ...target, mode: 'off', pulseMs: 2000, text: '' },
 						},
 					],
 				},
 			],
-			feedbacks: [{ feedbackId: 'role_status', options: { targets: [`r:${role.id}`], names: '', showText: true } }],
+			feedbacks: [
+				{
+					feedbackId: 'role_online',
+					options: target,
+					isInverted: true,
+					style: { bgcolor: COLORS.grey, color: COLORS.dimText },
+				},
+				{
+					feedbackId: 'role_battery_below',
+					options: { ...target, threshold: self.config.lowBattery },
+					style: { bgcolor: COLORS.orange, color: COLORS.white },
+				},
+				{
+					feedbackId: 'role_calling',
+					options: target,
+					style: { bgcolor: COLORS.amber, color: COLORS.black },
+				},
+				{
+					feedbackId: 'role_talking',
+					options: { ...target, key: 'any' },
+					style: { bgcolor: COLORS.red, color: COLORS.white },
+				},
+			],
 		}
 	}
 

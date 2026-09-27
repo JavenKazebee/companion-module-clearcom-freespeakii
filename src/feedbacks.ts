@@ -19,7 +19,6 @@ import {
 	isTalking,
 	lowBatteryPacks,
 	missingRoles,
-	packName,
 	portInChannel,
 	resolveTargets,
 } from './resolve.js'
@@ -32,7 +31,6 @@ export type FeedbacksSchema = {
 	role_calling: { type: 'boolean'; options: Targets }
 	role_battery_below: { type: 'boolean'; options: Targets & { threshold: number } }
 	role_signal_below: { type: 'boolean'; options: Targets & { threshold: number } }
-	role_status: { type: 'advanced'; options: Targets & { showText: boolean } }
 	channel_talking: { type: 'boolean'; options: { connection: number } }
 	channel_calling: { type: 'boolean'; options: { connection: number } }
 	port_in_channel: { type: 'boolean'; options: { port: number; connection: number } }
@@ -120,32 +118,6 @@ export function UpdateFeedbacks(self: ModuleInstance): void {
 			options: [...targetOptions, thresholdOption('Link quality below', 30)],
 			callback: ({ options }) =>
 				packsFor(options).some((e) => isOnline(e) && (e.liveStatus?.linkQuality ?? 100) < options.threshold),
-		},
-		role_status: {
-			type: 'advanced',
-			name: 'Role / pack status (all-in-one)',
-			description: 'Red = talking, amber = calling, orange = low battery, grey = offline',
-			options: [
-				...targetOptions,
-				{ id: 'showText', type: 'checkbox', label: 'Set button text (name + battery)', default: true },
-			],
-			callback: ({ options }) => {
-				const list = packsFor(options)
-				const online = list.filter(isOnline)
-				const name = list[0] ? packName(state, list[0]) : ''
-				const battery = online.map(batteryLevel).filter((b): b is number => b !== undefined)
-				const minBattery = battery.length ? Math.min(...battery) : undefined
-				const text = options.showText
-					? { text: `${name}\n${online.length ? (minBattery !== undefined ? `${minBattery}%` : '') : 'OFFLINE'}` }
-					: {}
-				if (!state.ready || !list.length) return { ...text, bgcolor: COLORS.grey, color: COLORS.dimText }
-				if (!online.length) return { ...text, bgcolor: COLORS.grey, color: COLORS.dimText }
-				if (online.some((e) => isTalking(e))) return { ...text, bgcolor: COLORS.red, color: COLORS.white }
-				if (online.some(isCalling)) return { ...text, bgcolor: COLORS.amber, color: COLORS.black }
-				if (minBattery !== undefined && minBattery < self.config.lowBattery)
-					return { ...text, bgcolor: COLORS.orange, color: COLORS.white }
-				return text
-			},
 		},
 		channel_talking: {
 			type: 'boolean',

@@ -8,10 +8,6 @@ changes, base port routing and GPOs.
 
 1. Enter the **base IP address or hostname**. No username or password is needed (see _Security_ below).
 2. Leave **Device ID** at `1` unless your base is part of a linked system.
-3. The status shows `Connected — 11/20 packs online` once the module has loaded the system.
-
-Tested with base firmware 1.6.15.0. Other versions will probably work; the log shows a warning if yours has
-not been tested.
 
 ### Targeting beltpacks by role
 
@@ -39,10 +35,10 @@ Reboot, reset, firmware and configuration editing are deliberately not included.
 
 ### Feedbacks
 
-- **Role / pack status (all-in-one)**: red = talking, amber = calling, orange = low battery, grey = offline. Can
-  also set the button text to the role name and battery %.
 - Role / pack is talking (any key or a specific key), is online, has a call active, battery or link quality below
-  a threshold.
+  a threshold. Each one takes any mix of roles and packs, and is true if any of them match. Stack them on a button
+  (the role presets use grey = offline via inverted "is online", orange = low battery, amber = calling,
+  red = talking).
 - Channel: someone is talking / calling. Base port is routed to a channel.
 - Any online pack below a battery threshold. Any expected role has no pack online.
 - GPI / GPO state, connected to the base.
@@ -59,7 +55,7 @@ Variables use numeric ids, so renaming a role in CCM does not break your buttons
 
 ### Presets
 
-- **Crew (roles)**: one button per role. Hold to call; colours from the all-in-one status feedback.
+- **Crew (roles)**: one button per role. Hold to call; grey = offline, orange = low battery, amber = calling, red = talking.
 - **Channels**: talk tally per partyline that shows who is talking. Hold to call the whole channel.
 - **Status & alerts**: base status, low battery list, last incoming call.
 - **Base ports**: call signal per port.
