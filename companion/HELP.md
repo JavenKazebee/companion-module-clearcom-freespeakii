@@ -37,8 +37,7 @@ Reboot, reset, firmware and configuration editing are deliberately not included.
 
 - Role / pack is talking (any key or a specific key), is online, has a call active, battery or link quality below
   a threshold. Each one takes any mix of roles and packs, and is true if any of them match. Stack them on a button
-  (the role presets use grey = offline via inverted "is online", orange = low battery, amber = calling,
-  red = talking).
+  (e.g. grey = offline via inverted "is online", orange = low battery, amber = calling, red = talking).
 - Channel: someone is talking / calling. Base port is routed to a channel.
 - Any online pack below a battery threshold. Any expected role has no pack online.
 - GPI / GPO state, connected to the base.
@@ -52,13 +51,6 @@ Variables use numeric ids, so renaming a role in CCM does not break your buttons
 - Per channel (`ch<connectionId>_...`): `label`, `talkers`, `talk_count`, `members`
 - System: `base_state`, `base_uptime`, `base_version`, `packs_online`, `packs_total`, `low_battery_list`,
   `offline_list`, `last_caller`, `last_call_channel`, `last_call_time`, `gpi<n>`, `gpo<n>`
-
-### Presets
-
-- **Crew (roles)**: one button per role. Hold to call; grey = offline, orange = low battery, amber = calling, red = talking.
-- **Channels**: talk tally per partyline that shows who is talking. Hold to call the whole channel.
-- **Status & alerts**: base status, low battery list, last incoming call.
-- **Base ports**: call signal per port.
 
 ### Limitations
 

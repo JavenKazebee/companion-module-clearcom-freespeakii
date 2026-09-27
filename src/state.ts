@@ -14,7 +14,7 @@ import { isCalling, packName } from './resolve.js'
 export interface StateChange {
 	/** Live values changed: re-check feedbacks and variables. */
 	live: boolean
-	/** Ids/labels changed: rebuild action/feedback/preset/variable definitions. */
+	/** Ids/labels changed: rebuild action/feedback/variable definitions. */
 	structure: boolean
 }
 

@@ -4,7 +4,6 @@ import { UpdateVariableDefinitions, computeVariableValues, type VariablesSchema 
 import { UpgradeScripts } from './upgrades.js'
 import { UpdateActions, type ActionsSchema } from './actions.js'
 import { UpdateFeedbacks, type FeedbacksSchema } from './feedbacks.js'
-import { UpdatePresets } from './presets.js'
 import { FsiiApi } from './api.js'
 import { FsiiSocket } from './socket.js'
 import { FsiiState, mergeChanges, type StateChange } from './state.js'
@@ -295,7 +294,6 @@ export default class ModuleInstance extends InstanceBase<ModuleSchema> {
 		UpdateActions(this)
 		UpdateFeedbacks(this)
 		UpdateVariableDefinitions(this)
-		UpdatePresets(this)
 		this.#lastValues = {}
 		this.#redraw()
 	}
