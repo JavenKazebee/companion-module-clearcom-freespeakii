@@ -51,13 +51,3 @@ Variables use numeric ids, so renaming a role in CCM does not break your buttons
 - Per channel (`ch<connectionId>_...`): `label`, `talkers`, `talk_count`, `members`
 - System: `base_state`, `base_uptime`, `base_version`, `packs_online`, `packs_total`, `low_battery_list`,
   `offline_list`, `last_caller`, `last_call_channel`, `last_call_time`, `gpi<n>`, `gpo<n>`
-
-### Limitations
-
-- The base cannot press a beltpack's talk/listen keys or change its volume remotely. These are only readable.
-- There is no system-wide call or RMK on the base. The "all" and "channel" actions send one command per pack.
-
-### Security
-
-The base's control API and live event stream on port 80 are **not password protected**. Only the CCM web pages
-ask for a login. Anyone who can reach the base can control it, so keep it on an isolated production network.
