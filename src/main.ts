@@ -86,7 +86,7 @@ export default class ModuleInstance extends InstanceBase<ModuleSchema> {
 	#start(): void {
 		const host = this.config.host?.trim()
 		if (!host) {
-			this.#setStatus(InstanceStatus.BadConfig, 'Set the base IP address')
+			this.#setStatus(InstanceStatus.BadConfig, 'Set the base IP address or hostname')
 			return
 		}
 		this.api = new FsiiApi(host, this.config.deviceId)

@@ -31,7 +31,6 @@ The base has no published control API. This module uses the same interface as th
 yarn            # install
 yarn build      # compile to dist/
 yarn dev        # watch mode
-yarn test       # unit tests (vitest), using anonymized fixtures captured from a real base
 yarn lint
 yarn package    # build the distributable package
 ```

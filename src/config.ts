@@ -30,9 +30,9 @@ export function GetConfigFields(): SomeCompanionConfigField[] {
 		{
 			type: 'textinput',
 			id: 'host',
-			label: 'Base IP address',
+			label: 'Base IP address or hostname',
 			width: 8,
-			regex: Regex.IP,
+			regex: Regex.HOSTNAME,
 			default: DEFAULT_CONFIG.host,
 		},
 		{

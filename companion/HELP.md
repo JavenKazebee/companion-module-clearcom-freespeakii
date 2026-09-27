@@ -6,7 +6,7 @@ changes, base port routing and GPOs.
 
 ### Setup
 
-1. Enter the **base IP address**. No username or password is needed (see _Security_ below).
+1. Enter the **base IP address or hostname**. No username or password is needed (see _Security_ below).
 2. Leave **Device ID** at `1` unless your base is part of a linked system.
 3. The status shows `Connected — 11/20 packs online` once the module has loaded the system.
 
