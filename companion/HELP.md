@@ -12,7 +12,7 @@ changes, base port routing and GPOs.
 ### Targeting beltpacks by role
 
 Actions and feedbacks target **roles** (e.g. "Camera 5"), not physical packs. A button follows whoever is using
-the role, even when crew swap packs. Each dropdown also lists physical packs (`Pack FSII-BP-63184`) for spares
+the role, even when crew swap packs. Each dropdown also lists physical packs (`Pack FSII-BP-12345`) for spares
 with no meaningful role.
 
 You can select several roles at once. You can also type names into **Or by name** (comma separated role labels,

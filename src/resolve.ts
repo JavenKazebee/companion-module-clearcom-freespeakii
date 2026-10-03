@@ -48,7 +48,7 @@ export function participantName(state: FsiiState, p: Participant): string {
 export type TargetId = `r:${number}` | `p:${number}`
 
 /**
- * Resolve dropdown targets plus an optional free-text list ("Camera 1, Sparky, 63184") to pack endpoints.
+ * Resolve dropdown targets plus an optional free-text list ("Camera 1, Stage Left, 12345") to pack endpoints.
  * Free text matches role labels, pack labels or pack ids, case-insensitively.
  */
 export function resolveTargets(state: FsiiState, targets: unknown, names?: unknown): Endpoint[] {

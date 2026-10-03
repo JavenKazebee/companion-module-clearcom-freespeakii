@@ -2,7 +2,7 @@
 	"$schema": "../node_modules/@companion-module/base/assets/manifest.schema.json",
 	"type": "connection",
 	"id": "clearcom-freespeakii",
-	"name": "clearcom-freespeakii",
+	"name": "Clear-Com FreeSpeak II",
 	"shortname": "freespeakii",
 	"description": "Clear-Com FreeSpeak II base station: beltpack tallies, battery/status, call signals, RMK, role and port routing",
 	"version": "0.1.0",
